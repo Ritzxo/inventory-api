@@ -15,9 +15,6 @@ inventory = {}
 def health():
     return {"status": "ok"}
 
-@app.get("/items/{item_id}")
-def get_item(item_id: int):
-    return {"item_id": item_id}
 
 @app.post("/items", status_code=201)
 def add_item(item: Item):
@@ -25,5 +22,11 @@ def add_item(item: Item):
         raise HTTPException(status_code=409, detail=f"Item '{item.name}' already exists")
     inventory[item.name] = item
     return item
+
+@app.get('/items/{name}', response_model=Item)
+def get_item(name: str):
+    if name not in inventory:
+        raise HTTPException(status_code= 404, detail=f"Item '{name}' not found")
+    return inventory[name]
 
 
