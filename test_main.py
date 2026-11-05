@@ -49,3 +49,17 @@ def test_existing_item():
 def test_get_missing_item():
     response = client.get("/items/none")
     assert response.status_code == 404
+
+def test_reduce_stock():
+    client.post("/items", json={"name": "item1", "price": 10.0, "stock": 7})
+    response = client.patch("/items/item1", json={"change": -3})
+    assert response.status_code == 200
+    assert response.json()["stock"] == 4
+
+
+def test_too_much_reduction():
+    client.post("/items", json={"name": "item1", "price": 10.0, "stock": 5})
+    response = client.patch("/items/item1", json={"change": -10})
+    assert response.status_code == 409
+    stored = client.get("/items/item1")
+    assert stored.json()["stock"]== 5
