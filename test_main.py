@@ -63,3 +63,12 @@ def test_too_much_reduction():
     assert response.status_code == 409
     stored = client.get("/items/item1")
     assert stored.json()["stock"]== 5
+
+def test_missing_item_update_stock():
+    response = client.patch("/items/none", json={"change": 5})
+    assert response.status_code == 404
+
+def test_invalid_change():
+    client.post("/items", json={"name": "item1", "price": 10.0, "stock": 5})
+    response = client.patch("/items/item1", json= {"change": "abc"})
+    assert response.status_code == 422
