@@ -40,3 +40,12 @@ def test_invalid_price():
     response = client.post("/items", json={"name": "item1", "price": "abc", "stock": 5})
     assert response.status_code == 422
 
+def test_existing_item():
+    client.post("/items", json={"name": "item1", "price": 10.0, "stock": 4})
+    response = client.get("/items/item1")
+    assert response.status_code == 200
+    assert response.json() == {"name": "item1", "price": 10.0, "stock": 4}
+
+def test_get_missing_item():
+    response = client.get("/items/none")
+    assert response.status_code == 404
