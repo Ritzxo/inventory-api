@@ -32,4 +32,11 @@ def test_add_existing_item():
     assert stored.json()["price"] == 10.0
     assert stored.json()["stock"] == 5
 
+def test_add_item_negative_stock_returns_422():
+    response = client.post("/items", json={"name": "item1", "price": 10.0, "stock": -5})
+    assert response.status_code == 422
+
+def test_invalid_price():
+    response = client.post("/items", json={"name": "item1", "price": "abc", "stock": 5})
+    assert response.status_code == 422
 
