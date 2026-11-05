@@ -1,0 +1,35 @@
+import pytest
+from fastapi.testclient import TestClient
+
+from main import app, inventory
+
+client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def clean_inventory():
+    inventory.clear()
+    yield
+    inventory.clear()
+
+
+def test_health():
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+def test_add_item():
+    response = client.post("/items", json={"name": "item1", "price": 10.0, "stock": 5})
+    assert response.status_code == 201
+    assert response.json() == {"name": "item1", "price": 10.0, "stock": 5}
+
+def test_add_existing_item():
+    client.post("/items", json={"name": "item1", "price": 10.0, "stock": 5})
+    response = client.post("/items", json={"name": "item1", "price": 15.0, "stock": 3})
+    assert response.status_code == 409
+    assert response.json() == {"detail": "Item 'item1' already exists"}
+    stored = client.get("/items/item1")
+    assert stored.json()["price"] == 10.0
+    assert stored.json()["stock"] == 5
+
+
