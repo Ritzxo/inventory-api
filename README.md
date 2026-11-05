@@ -33,10 +33,10 @@ The planned endpoints, status codes and the reasoning behind them are in
 ## Roadmap
 
 - [x] Project setup, virtual environment, health check endpoint
-- [ ] `POST /items` with pydantic validation
-- [ ] `GET /items/{name}`
-- [ ] `PATCH /items/{name}`
-- [ ] `POST /sales` (atomic, all-or-nothing)
+- [x] `POST /items` with pydantic validation
+- [x] `GET /items/{name}`
+- [x] `PATCH /items/{name}`
+- [x] `POST /sales` (atomic, all-or-nothing)
 - [ ] Automated tests with pytest, run in GitHub Actions
 - [ ] Persistent storage with SQLite and SQLAlchemy
 - [ ] Switch to Postgres and run everything with Docker Compose
