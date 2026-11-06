@@ -89,3 +89,11 @@ def test_sale_reduce_stock():
     store2 = client.get("/items/item2")
     assert store.json()["stock"] == 3
     assert store2.json()["stock"] == 2
+
+def test_sale_missing_item():
+    client.post("/items", json= {"name": "item1", "price": 10.0, "stock": 5})
+    response = client.post("/sales", json= {"items": {"item1": 2, "item2": 1}})
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Item 'item2' not found!"}
+    stored = client.get ("/items/item1")
+    assert stored.json()["stock"] == 5
