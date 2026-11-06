@@ -1,5 +1,7 @@
 # inventory-api
 
+[![Tests](https://github.com/Ritzxo/inventory-api/actions/workflows/tests.yml/badge.svg)](https://github.com/Ritzxo/inventory-api/actions/workflows/tests.yml)
+
 A small REST API for managing inventory, built with Python and FastAPI.
 
 This started as a command-line script in my [python-practice](https://github.com/Ritzxo/python-practice)
@@ -25,6 +27,16 @@ uvicorn main:app --reload
 
 Then open <http://127.0.0.1:8000/docs> for the interactive API documentation.
 
+## Run the tests
+
+```bash
+pytest -v
+```
+
+The tests cover every endpoint, including the error cases. A failed sale or stock update
+must leave stored data unchanged. They also run automatically on every push through
+GitHub Actions.
+
 ## API design
 
 The planned endpoints, status codes and the reasoning behind them are in
@@ -37,6 +49,6 @@ The planned endpoints, status codes and the reasoning behind them are in
 - [x] `GET /items/{name}`
 - [x] `PATCH /items/{name}`
 - [x] `POST /sales` (atomic, all-or-nothing)
-- [ ] Automated tests with pytest, run in GitHub Actions
+- [x] Automated tests with pytest, run in GitHub Actions
 - [ ] Persistent storage with SQLite and SQLAlchemy
 - [ ] Switch to Postgres and run everything with Docker Compose
