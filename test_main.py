@@ -72,3 +72,10 @@ def test_invalid_change():
     client.post("/items", json={"name": "item1", "price": 10.0, "stock": 5})
     response = client.patch("/items/item1", json= {"change": "abc"})
     assert response.status_code == 422
+
+def test_sale_success():
+    client.post("/items", json= {"name": "item1", "price": 10.0, "stock": 5})
+    client.post("/items", json= {"name": "item2", "price": 20.0, "stock": 3})
+    response = client.post("/sales", json= {"items": {"item1": 2, "item2": 1}})
+    assert response.status_code == 200
+    assert response.json() == {"total_revenue": 40.0}

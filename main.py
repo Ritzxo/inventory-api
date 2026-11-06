@@ -69,3 +69,6 @@ def record_sales(sale: SaleRequest):
         total += inventory[name].price * quantity
 
     return {"total_revenue": round(total, 2)}
+
+
+
