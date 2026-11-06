@@ -79,3 +79,13 @@ def test_sale_success():
     response = client.post("/sales", json= {"items": {"item1": 2, "item2": 1}})
     assert response.status_code == 200
     assert response.json() == {"total_revenue": 40.0}
+
+def test_sale_reduce_stock():
+    client.post("/items", json= {"name": "item1", "price": 10.0, "stock": 5})
+    client.post("/items", json= {"name": "item2", "price": 20.0, "stock": 3})
+    response = client.post("/sales", json= {"items": {"item1": 2, "item2": 1}})
+    assert response.status_code == 200
+    store = client.get("/items/item1")
+    store2 = client.get("/items/item2")
+    assert store.json()["stock"] == 3
+    assert store2.json()["stock"] == 2
