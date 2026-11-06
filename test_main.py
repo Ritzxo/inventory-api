@@ -97,3 +97,25 @@ def test_sale_missing_item():
     assert response.json() == {"detail": "Item 'item2' not found!"}
     stored = client.get ("/items/item1")
     assert stored.json()["stock"] == 5
+
+def test_sale_insufficient_stock():
+    client.post("/items", json= {"name": "item1", "price": 10.0, "stock": 5})
+    response = client.post("/sales", json= {"items": {"item1": 10}})
+    assert response.status_code == 409
+    assert response.json() == {"detail": "Not enough stock for item 'item1'"}
+    stored = client.get("/items/item1")
+    assert stored.json()["stock"] == 5
+
+def test_sale_invalid_quantity():
+    client.post("/items", json= {"name": "item1", "price": 10.0, "stock": 5})
+    response = client.post("/sales", json= {"items": {"item1": "abc"}})
+    assert response.status_code == 422
+    stored = client.get("/items/item1")
+    assert stored.json()["stock"] == 5
+
+def test_sale_negative_quantity():
+    client.post("/items", json= {"name": "item1", "price": 10.0, "stock": 5})
+    response = client.post("/sales", json= {"items": {"item1": -2}})
+    assert response.status_code == 422
+    stored = client.get("/items/item1")
+    assert stored.json()["stock"] == 5
