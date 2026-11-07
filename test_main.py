@@ -119,3 +119,12 @@ def test_sale_negative_quantity():
     assert response.status_code == 422
     stored = client.get("/items/item1")
     assert stored.json()["stock"] == 5
+
+def test_existing_name_with_different_price():
+    client.post("/items", json= {"name": "item1", "price": 10.0, "stock": 5})
+    response = client.post("/items", json= {"name": "item1", "price": 15.0, "stock": 3})
+    assert response.status_code == 409
+    assert response.json() == {"detail": "Item 'item1' already exists"}
+    stored = client.get("/items/item1")
+    assert stored.json()["price"] == 10.0
+    assert stored.json()["stock"] == 5
