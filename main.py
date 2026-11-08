@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field, PositiveInt
 
 from fastapi import Depends
+
 from sqlalchemy.orm import Session
 
 from database import SessionLocal, ItemDB
@@ -37,10 +38,12 @@ def health():
 
 
 @app.post("/items", status_code=201)
-def add_item(item: Item):
-    if item.name in inventory:
+def add_item(item: Item, db: Session = Depends(get_db)):
+    existing = db.get(ItemDB, item.name)
+    if existing is not None:
         raise HTTPException(status_code=409, detail=f"Item '{item.name}' already exists")
-    inventory[item.name] = item
+    db.add(ItemDB(name=item.name, price=item.price, stock=item.stock))
+    db.commit()
     return item
 
 @app.get('/items/{name}', response_model=Item)
