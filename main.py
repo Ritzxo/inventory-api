@@ -30,7 +30,6 @@ class StockUpdate(BaseModel):
 
 app =  FastAPI()
 
-inventory = {}
 
 @app.get("/health")
 def health():
@@ -47,41 +46,42 @@ def add_item(item: Item, db: Session = Depends(get_db)):
     return item
 
 @app.get('/items/{name}', response_model=Item)
-def get_item(name: str):
-    if name not in inventory:
-        raise HTTPException(status_code= 404, detail=f"Item '{name}' not found")
-    return inventory[name]
+def get_item(name: str, db: Session = Depends(get_db),):
+    item = db.get(ItemDB, name)
+    if item is None:
+        raise HTTPException(status_code=404, detail=f"Item '{name}' not found!")
+    return Item(name=item.name, price=item.price, stock=item.stock)
 
 @app.patch('/items/{name}', response_model=Item)
-def update_stock(name: str, stock_update: StockUpdate):
+def update_stock(name: str, stock_update: StockUpdate, db: Session = Depends(get_db)):
+    item = db.get(ItemDB, name)
+    if item is None:
+        raise HTTPException(status_code = 404, detail=f"Item '{name}' not found!")
 
-    if name not in inventory:
-        raise HTTPException(status_code=404, detail=f"Item '{name}' not found!")
-
-    new_stock = inventory[name].stock + stock_update.change
-
+    new_stock = item.stock + stock_update.change
 
     if new_stock < 0:
-        raise HTTPException(status_code= 409, detail="Stock can not be in negative")
-
-
-    inventory[name].stock = new_stock
-    return inventory[name]
+        raise HTTPException(status_code=409, detail=f"Stock cannot be negative")
+    item.stock = new_stock
+    db.commit()
+    return Item(name=item.name, price=item.price, stock=item.stock)
 
 
 @app.post("/sales")
-def record_sales(sale: SaleRequest):
+def record_sales(sale: SaleRequest, db: Session = Depends(get_db)):
 
-    for name, quantity in sale.items.items():
-        if name not in inventory:
-            raise HTTPException(status_code=404, detail=f"Item '{name}' not found!")
-        if quantity > inventory[name].stock:
-            raise HTTPException(status_code=409, detail=f"Not enough stock for item '{name}'")
+    for item_name, quantity in sale.items.items():
+        item = db.get(ItemDB, item_name)
+        if item is None:
+            raise HTTPException(status_code=404, detail=f"Item '{item_name}' not found!")
+        if item.stock < quantity:
+            raise HTTPException(status_code=409, detail=f"Not enough stock for item '{item_name}'")
 
-    total = 0    
+    total_price = 0
 
-    for name, quantity in sale.items.items():
-        inventory[name].stock -= quantity
-        total += inventory[name].price * quantity
-
-    return {"total_revenue": round(total, 2)}
+    for item_name, quantity in sale.items.items():
+        item = db.get(ItemDB, item_name)
+        item.stock -= quantity
+        total_price += item.price * quantity
+    db.commit()
+    return {"total_revenue": round(total_price, 2)}

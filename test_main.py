@@ -1,16 +1,34 @@
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-from main import app, inventory
+from database import Base
+from main import app, get_db
+
+test_engine = create_engine("sqlite:///test.db")
+TestSession = sessionmaker(bind=test_engine)
+
+
+def override_get_db():
+    db = TestSession()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
 
 
 @pytest.fixture(autouse=True)
-def clean_inventory():
-    inventory.clear()
+def clean_database():
+    Base.metadata.drop_all(test_engine)
+    Base.metadata.create_all(test_engine)
     yield
-    inventory.clear()
+    Base.metadata.drop_all(test_engine)
 
 
 def test_health():

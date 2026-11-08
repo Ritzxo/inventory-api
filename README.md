@@ -50,5 +50,5 @@ The planned endpoints, status codes and the reasoning behind them are in
 - [x] `PATCH /items/{name}`
 - [x] `POST /sales` (atomic, all-or-nothing)
 - [x] Automated tests with pytest, run in GitHub Actions
-- [ ] Persistent storage with SQLite and SQLAlchemy
+- [x] Persistent storage with SQLite and SQLAlchemy
 - [ ] Switch to Postgres and run everything with Docker Compose
