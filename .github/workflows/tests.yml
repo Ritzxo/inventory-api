@@ -7,6 +7,20 @@ on:
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_USER: inventory
+          POSTGRES_PASSWORD: inventory
+          POSTGRES_DB: inventory
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U inventory"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

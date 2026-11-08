@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
-engine = create_engine("sqlite:///inventory.db")
+engine = create_engine("postgresql+psycopg2://inventory:inventory@localhost:5432/inventory")
 SessionLocal = sessionmaker(bind=engine)
 
 
