@@ -51,4 +51,4 @@ The planned endpoints, status codes and the reasoning behind them are in
 - [x] `POST /sales` (atomic, all-or-nothing)
 - [x] Automated tests with pytest, run in GitHub Actions
 - [x] Persistent storage with SQLite and SQLAlchemy
-- [ ] Switch to Postgres and run everything with Docker Compose
+- [x] Switch to Postgres and run everything with Docker Compose
