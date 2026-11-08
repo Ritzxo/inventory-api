@@ -2,6 +2,19 @@ from fastapi import FastAPI, HTTPException
 
 from pydantic import BaseModel, Field, PositiveInt
 
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from database import SessionLocal, ItemDB
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 class SaleRequest(BaseModel):
     items: dict[str, PositiveInt]
 
@@ -69,6 +82,3 @@ def record_sales(sale: SaleRequest):
         total += inventory[name].price * quantity
 
     return {"total_revenue": round(total, 2)}
-
-
-
