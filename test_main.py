@@ -146,3 +146,21 @@ def test_existing_name_with_different_price():
     stored = client.get("/items/item1")
     assert stored.json()["price"] == 10.0
     assert stored.json()["stock"] == 5
+
+def test_add_item_empty_name_returns_422():
+    response = client.post("/items", json={"name": "", "price": 1.0, "stock": 1})
+    assert response.status_code == 422
+
+def test_add_item_blank_name_returns_422():
+    response = client.post("/items", json={"name": "   ", "price": 1.0, "stock": 1})
+    assert response.status_code == 422
+
+def test_add_item_name_with_slash_returns_422():
+    response = client.post("/items", json={"name": "a/b", "price": 1.0, "stock": 1})
+    assert response.status_code == 422
+
+def test_add_item_name_spaces_are_trimmed():
+    response = client.post("/items", json={"name": "  apple  ", "price": 1.0, "stock": 1})
+    assert response.status_code == 201
+    assert response.json()["name"] == "apple"
+    assert client.get("/items/apple").status_code == 200

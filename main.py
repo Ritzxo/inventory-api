@@ -1,6 +1,8 @@
+from typing import Annotated
+
 from fastapi import FastAPI, HTTPException
 
-from pydantic import BaseModel, Field, PositiveInt
+from pydantic import BaseModel, Field, PositiveInt, StringConstraints
 
 from fastapi import Depends
 
@@ -16,11 +18,19 @@ def get_db():
     finally:
         db.close()
 
+# An item name is used in URLs like /items/{name}, so it must be non-empty after
+# trimming spaces, and must not contain "/" (a name with a slash couldn't be fetched
+# or updated, because the slash would split the URL path).
+ItemName = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1, max_length=100, pattern=r"^[^/]+$"),
+]
+
 class SaleRequest(BaseModel):
     items: dict[str, PositiveInt]
 
 class Item(BaseModel):
-    name: str
+    name: ItemName
     price: float = Field(ge=0)
     stock: int = Field(ge=0)
 

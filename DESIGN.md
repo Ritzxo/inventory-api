@@ -33,7 +33,7 @@ Request body:
 |---|---|
 | `201` | Item created; response body is the stored item |
 | `409` | An item with that name already exists |
-| `422` | Invalid input (wrong type, negative price or stock) |
+| `422` | Invalid input (wrong type, negative price or stock, or an invalid name) |
 
 ### `GET /items/{name}`
 
@@ -78,6 +78,10 @@ Request body:
 
 - **Item name is the identifier for now.** It mirrors the original script. A database
   with numeric ids may replace this later.
+- **Names are validated because they appear in URLs.** Since the name is part of
+  `/items/{name}`, a name must not be empty (after trimming spaces), must be at most 100
+  characters, and must not contain `/`. A name like `a/b` could be created but never
+  fetched or updated, because the slash splits the URL path.
 - **`PATCH` for stock changes** because only one field changes; `PUT` would replace the
   whole item. The field is called `change` rather than `quantity` to make clear it is
   added to the current stock, not set.
@@ -86,5 +90,10 @@ Request body:
   (atomicity) is safer and easier to reason about.
 - **Errors use status codes, not return values.** The original `check_availability`
   returned either a number or the string "Item not found". Now failure is a `404`.
-- **Storage starts in memory** and moves to a database in a later step, so the swap is
-  visible and the API layer stays independent of storage.
+- **Storage started in memory** and moved to SQLite, then Postgres, one step at a time,
+  so each swap was visible and the API layer stayed independent of storage.
+- **Settings come from the environment.** The database URL and password are read from
+  environment variables (loaded from a git-ignored `.env` file), not written in the code.
+  Tables are created by an explicit step (`python database.py`, which the Docker image
+  runs on startup), not as a side effect of importing the code, so tests and tools can
+  import the app without a database.
